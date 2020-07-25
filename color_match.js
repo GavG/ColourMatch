@@ -91,7 +91,13 @@ function initScenes()
                 drawColorGrid()
             },
             listeners: [
-                
+                {
+                    target: window,
+                    type: 'click',
+                    function: function(e){
+                        console.log(getCursorPosition(e))
+                    },
+                }
             ]
         },
 
@@ -152,4 +158,10 @@ function drawColorGrid()
             ctx.fillRect(row * rectWidth, col * rectHeight, rectWidth, rectHeight);
         }
     }
+}
+
+function getCursorPosition(event)
+{
+    const rect = canvas.getBoundingClientRect()
+    return { x: event.clientX - rect.left, y: event.clientY - rect.top}
 }
