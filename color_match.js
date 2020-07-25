@@ -10,7 +10,7 @@ let menuBackground
 let h1, h2, h3
 
 //scenes
-let currentScene, menuScene
+let currentScene, scenes
 
 function init()
 {
@@ -23,7 +23,7 @@ function init()
     initColors()
     initScenes()
 
-    setNewScene(menuScene)
+    setNewScene(scenes.menuScene)
 }
 
 function resizeCanvas()
@@ -56,19 +56,45 @@ function initFonts()
 
 function initScenes()
 {
-    menuScene = {
-        draw: function(){
-            ctx.fillStyle = menuBackground;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            drawText("COLOUR MATCH", h1)
-        },
-        listeners: [
+    scenes = {
+
+        menuScene: {
+            draw: function()
             {
-                target: window,
-                type: 'keydown',
-                function: (e) => console.log('keydown', e),
-            }
-        ]
+                ctx.fillStyle = menuBackground;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                drawText("COLOUR MATCH", h1)
+            },
+            listeners: [
+                {
+                    target: window,
+                    type: 'keydown',
+                    function: (e) => setNewScene(scenes.level1),
+                }
+            ]
+        },
+
+        level1: {
+            vars:{
+                colorGridRows: 2,
+                colorGridCols: 2,
+            },
+            init: function()
+            {
+                currentScene.vars.colorGrid = [
+                    '#FFF', '#DDD',
+                    '#BBB', '#999',
+                ]
+            },
+            draw: function()
+            {
+                drawColorGrid()
+            },
+            listeners: [
+                
+            ]
+        },
+
     }
 }
 
@@ -85,6 +111,9 @@ function setNewScene(newScene, clearSceneListeners = true)
     }
 
     currentScene = newScene
+
+    if(currentScene.hasOwnProperty('init')) currentScene.init()
+    
     for (let l = 0; l < currentScene.listeners.length; l++) {
         currentScene.listeners[l].target.addEventListener(
             currentScene.listeners[l].type,
@@ -98,6 +127,7 @@ function setNewScene(newScene, clearSceneListeners = true)
 function drawCurrentScene()
 {
     if(currentScene){
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         currentScene.draw()
     }
 }
@@ -109,4 +139,17 @@ function drawText(text, font, x = canvas.width / 2, y = canvas.height / 2, align
     ctx.fillStyle = font.color
     ctx.textAlign = alignment
     ctx.fillText(text, x, y)
+}
+
+function drawColorGrid()
+{
+    let rectWidth = canvas.width / currentScene.vars.colorGridCols
+    let rectHeight = canvas.height / currentScene.vars.colorGridRows
+
+    for (let row = 0; row < currentScene.vars.colorGridRows; row++) {
+        for (let col = 0; col < currentScene.vars.colorGridCols; col++) {
+            ctx.fillStyle = currentScene.vars.colorGrid[row + col]
+            ctx.fillRect(row * rectWidth, col * rectHeight, rectWidth, rectHeight);
+        }
+    }
 }
