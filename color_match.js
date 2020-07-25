@@ -10,8 +10,7 @@ let menuBackground
 let h1, h2, h3
 
 //scenes
-let currentScene
-let menuScene
+let currentScene, menuScene
 
 function init()
 {
@@ -22,7 +21,6 @@ function init()
     window.addEventListener('resize', resizeCanvas, false)
     
     initColors()
-    initFonts()
     initScenes()
 
     currentScene = menuScene
@@ -33,6 +31,7 @@ function resizeCanvas()
 {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+    initFonts()
     drawCurrentScene()
 }
 
