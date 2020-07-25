@@ -23,8 +23,7 @@ function init()
     initColors()
     initScenes()
 
-    currentScene = menuScene
-    drawCurrentScene()
+    setNewScene(menuScene)
 }
 
 function resizeCanvas()
@@ -62,13 +61,45 @@ function initScenes()
             ctx.fillStyle = menuBackground;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             drawText("COLOUR MATCH", h1)
+        },
+        listeners: [
+            {
+                target: window,
+                type: 'keydown',
+                function: (e) => console.log('keydown', e),
+            }
+        ]
+    }
+}
+
+function setNewScene(newScene, clearSceneListeners = true)
+{
+    if(currentScene && clearSceneListeners)
+    {
+        for (let l = 0; l < currentScene.listeners.length; l++) {
+            currentScene.listeners[l].target.removeEventListener(
+                currentScene.listeners[l].type,
+                currentScene.listeners[l].function
+            )
         }
     }
+
+    currentScene = newScene
+    for (let l = 0; l < currentScene.listeners.length; l++) {
+        currentScene.listeners[l].target.addEventListener(
+            currentScene.listeners[l].type,
+            currentScene.listeners[l].function
+        )
+    }
+
+    drawCurrentScene()
 }
 
 function drawCurrentScene()
 {
-    if(currentScene) currentScene.draw()
+    if(currentScene){
+        currentScene.draw()
+    }
 }
 
 //Utils
