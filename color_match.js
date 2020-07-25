@@ -49,8 +49,8 @@ function initFonts()
     }
 
     h2 = {
-        color: "#3ED",
-        typeFace: (canvas.height / 40) + "px Arial",
+        color: "#EED",
+        typeFace: (canvas.height / 30) + "px Arial",
     }
 }
 
@@ -78,24 +78,35 @@ function initScenes()
             vars:{
                 colorGridRows: 2,
                 colorGridCols: 2,
-            },
-            init: function()
-            {
-                currentScene.vars.colorGrid = [
-                    '#FFF', '#DDD',
-                    '#BBB', '#999',
-                ]
+                colorGrid: [
+                    '#FFF', '#CCC',
+                    '#999', '#555',
+                ],
+                questionTimeout: 3_000,
             },
             draw: function()
             {
-                drawColorGrid()
+                randomizeColorGrid()
+                chooseColor()
+                drawQuestionColor()
+                setTimeout(drawColorGrid, currentScene.vars.questionTimeout)
+                countdown(currentScene.vars.questionTimeout)
             },
             listeners: [
                 {
                     target: window,
                     type: 'click',
                     function: function(e){
-                        console.log(getCursorPosition(e))
+                        let pos = getCursorPosition(e)
+                        let col = Math.floor(pos.x / currentScene.vars.rectWidth)
+                        let row = Math.floor(pos.y / currentScene.vars.rectHeight)
+                        let selectedColIndex = col * currentScene.vars.colorGridCols + row
+
+                        if (selectedColIndex === currentScene.vars.chosenColor){
+                            alert('WIN!')
+                        } else {
+                            alert('NO!')
+                        }
                     },
                 }
             ]
@@ -139,6 +150,13 @@ function drawCurrentScene()
 }
 
 //Utils
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]]
+    }
+}
+
 function drawText(text, font, x = canvas.width / 2, y = canvas.height / 2, alignment = 'center')
 {
     ctx.font = font.typeFace
@@ -147,25 +165,60 @@ function drawText(text, font, x = canvas.width / 2, y = canvas.height / 2, align
     ctx.fillText(text, x, y)
 }
 
+function randomizeColorGrid()
+{
+    shuffleArray(currentScene.vars.colorGrid)
+}
+
 function drawColorGrid()
 {
-    let rectWidth = canvas.width / currentScene.vars.colorGridCols
-    let rectHeight = canvas.height / currentScene.vars.colorGridRows
+    currentScene.vars.rectWidth = canvas.width / currentScene.vars.colorGridCols
+    currentScene.vars.rectHeight = canvas.height / currentScene.vars.colorGridRows
+
+    let colIndex = 0
 
     for (let row = 0; row < currentScene.vars.colorGridRows; row++) {
         for (let col = 0; col < currentScene.vars.colorGridCols; col++) {
-            ctx.fillStyle = currentScene.vars.colorGrid[row + col]
-            ctx.fillRect(row * rectWidth, col * rectHeight, rectWidth, rectHeight);
+            ctx.fillStyle = currentScene.vars.colorGrid[colIndex]
+            ctx.fillRect(
+                row * currentScene.vars.rectWidth,
+                col * currentScene.vars.rectHeight,
+                currentScene.vars.rectWidth,
+                currentScene.vars.rectHeight
+            )
+            colIndex++
         }
     }
+}
+
+function chooseColor()
+{
+    currentScene.vars.chosenColor = Math.floor(Math.random() * currentScene.vars.colorGrid.length)
+}
+
+function drawQuestionColor()
+{
+    ctx.fillStyle = currentScene.vars.colorGrid[currentScene.vars.chosenColor]
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
 }
 
 function getCursorPosition(event)
 {
     const rect = canvas.getBoundingClientRect()
-    
+
     return {
         x: event.clientX - rect.left,
         y: event.clientY - rect.top,
+    }
+}
+
+function countdown(time)
+{
+    drawText(time / 1_000, h1)
+    for (let rem = time; rem > 0; rem -= 1_000) {
+        setTimeout(function(rem){
+            drawQuestionColor()
+            drawText(rem / 1_000, h1)
+        }, time - rem, rem)
     }
 }
