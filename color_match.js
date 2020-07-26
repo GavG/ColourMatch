@@ -3,6 +3,9 @@ window.addEventListener('load', init)
 //Objects
 let canvas, ctx
 
+//Setup Values
+let dpi = window.devicePixelRatio;
+
 //FillStyles
 let menuBackground
 
@@ -28,8 +31,12 @@ function init()
 
 function resizeCanvas()
 {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    let style_height = +getComputedStyle(canvas).getPropertyValue("height").slice(0, -2)
+    let style_width = +getComputedStyle(canvas).getPropertyValue("width").slice(0, -2)
+
+    canvas.height = style_height * dpi
+    canvas.width = style_width * dpi
+
     initFonts()
     drawCurrentScene()
 }
@@ -37,8 +44,8 @@ function resizeCanvas()
 function initColors()
 {
     menuBackground = ctx.createLinearGradient(0, 0, canvas.width, canvas.height)
-    menuBackground.addColorStop(0, "#333")
-    menuBackground.addColorStop(1, "#999")    
+    menuBackground.addColorStop(0, "#E33")
+    menuBackground.addColorStop(1, "#E66")    
 }
 
 function initFonts()
@@ -69,7 +76,7 @@ function initScenes()
                 {
                     target: window,
                     type: 'keydown',
-                    function: (e) => setNewScene(scenes.level1),
+                    function: (e) => setNewScene(getHighestLevel()),
                 }
             ]
         },
@@ -80,7 +87,7 @@ function initScenes()
                 colorGridCols: 2,
                 colorGrid: [
                     '#FFF', '#CCC',
-                    '#999', '#555',
+                    '#999', '#654',
                 ],
                 questionTimeout: 3_000,
                 nextScene: 'level2',
@@ -109,9 +116,9 @@ function initScenes()
                 colorGridRows: 3,
                 colorGridCols: 2,
                 colorGrid: [
-                    '#00F', '#22F',
-                    '#40D', '#11E',
-                    '#66D', '#22C',
+                    '#005', '#33F',
+                    '#44D', '#11C',
+                    '#116', '#00A',
                 ],
                 questionTimeout: 3_000,
                 nextScene: 'level4',
@@ -245,6 +252,7 @@ let colorQuestionListener = {
 
         if (selectedColIndex === currentScene.vars.chosenColor) {
             alert('WIN!')
+            setHighestLevel(currentScene.vars.nextScene)
             setNewScene(scenes[currentScene.vars.nextScene])
         } else {
             alert('NO!')
@@ -260,4 +268,14 @@ function colorQuestionDraw() {
     drawQuestionColor()
     setTimeout(drawColorGrid, currentScene.vars.questionTimeout)
     countdown(currentScene.vars.questionTimeout)
+}
+
+function getHighestLevel()
+{
+    return scenes[localStorage.getItem('highestLevel') || 'level1']
+}
+
+function setHighestLevel(levelName)
+{
+    localStorage.setItem('highestLevel', levelName)
 }
