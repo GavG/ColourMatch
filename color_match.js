@@ -57,7 +57,7 @@ function initFonts()
 
     h2 = {
         color: "#EED",
-        typeFace: (canvas.height / 30) + "px Arial",
+        typeFace: (canvas.height / 40) + "px Arial",
     }
 }
 
@@ -68,14 +68,15 @@ function initScenes()
         menuScene: {
             draw: function()
             {
-                ctx.fillStyle = menuBackground;
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = menuBackground
+                ctx.fillRect(0, 0, canvas.width * dpi, canvas.height * dpi)
                 drawText("COLOUR MATCH", h1)
+                drawText("Click to play", h2, canvas.width / 2, canvas.height * 0.66)
             },
             listeners: [
                 {
                     target: window,
-                    type: 'keydown',
+                    type: 'click',
                     function: (e) => setNewScene(getHighestLevel()),
                 }
             ]
@@ -87,7 +88,7 @@ function initScenes()
                 colorGridCols: 2,
                 colorGrid: [
                     '#FFF', '#CCC',
-                    '#999', '#654',
+                    '#999', '#555',
                 ],
                 questionTimeout: 3_000,
                 nextScene: 'level2',
@@ -116,9 +117,9 @@ function initScenes()
                 colorGridRows: 3,
                 colorGridCols: 2,
                 colorGrid: [
-                    '#005', '#33F',
-                    '#44D', '#11C',
-                    '#116', '#00A',
+                    '#002', '#005',
+                    '#028', '#20A',
+                    '#00C', '#00F',
                 ],
                 questionTimeout: 3_000,
                 nextScene: 'level4',
@@ -172,12 +173,26 @@ function shuffleArray(array) {
     }
 }
 
-function drawText(text, font, x = canvas.width / 2, y = canvas.height / 2, alignment = 'center')
+function drawText(
+    text,
+    font,
+    x = canvas.width / 2,
+    y = canvas.height / 2,
+    alignment = 'center',
+    stroke = '#666',
+    strokeWidth = 2
+)
 {
     ctx.font = font.typeFace
     ctx.fillStyle = font.color
     ctx.textAlign = alignment
     ctx.fillText(text, x, y)
+
+    if(stroke){
+        ctx.strokeStyle = stroke
+        ctx.lineWidth = strokeWidth
+        ctx.strokeText(text, x, y)
+    }
 }
 
 function randomizeColorGrid()
@@ -224,8 +239,8 @@ function getCursorPosition(event)
     const rect = canvas.getBoundingClientRect()
 
     return {
-        x: event.clientX - rect.left,
-        y: event.clientY - rect.top,
+        x: (event.clientX - rect.left) * dpi,
+        y: (event.clientY - rect.top) * dpi,
     }
 }
 
@@ -244,18 +259,27 @@ let colorQuestionListener = {
     target: window,
     type: 'click',
     function: function (e) {
+        
+        if (currentScene.vars.levelComplete){
+            setHighestLevel(currentScene.vars.nextScene)
+            return setNewScene(scenes[currentScene.vars.nextScene])
+        }
+
         if (!currentScene.vars.colorGridDrawn) return false
+        
         let pos = getCursorPosition(e)
         let col = Math.floor(pos.x / currentScene.vars.rectWidth)
         let row = Math.floor(pos.y / currentScene.vars.rectHeight)
-        let selectedColIndex = col * currentScene.vars.colorGridCols + row
+        let selectedColIndex = (row * currentScene.vars.colorGridRows) + col
 
         if (selectedColIndex === currentScene.vars.chosenColor) {
-            alert('WIN!')
-            setHighestLevel(currentScene.vars.nextScene)
-            setNewScene(scenes[currentScene.vars.nextScene])
+            ctx.fillStyle = '#000'
+            ctx.fillRect(0, 0, canvas.height * dpi, canvas.width * dpi)
+            drawText('Correct! Click to continue...', h2)
+            currentScene.vars.levelComplete = true
         } else {
             alert('NO!')
+            setHighestLevel('level1')
             setNewScene(scenes.menuScene)
         }
     },
@@ -263,6 +287,7 @@ let colorQuestionListener = {
 
 function colorQuestionDraw() {
     currentScene.vars.colorGridDrawn  = false
+    currentScene.vars.levelComplete = false
     randomizeColorGrid()
     chooseColor()
     drawQuestionColor()
