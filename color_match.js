@@ -10,7 +10,7 @@ let dpi = window.devicePixelRatio;
 let menuBackground
 
 //Fonts
-let h1, h2, h3
+let fonts
 
 //scenes
 let currentScene, scenes
@@ -26,7 +26,7 @@ function init()
     initColors()
     initScenes()
 
-    setNewScene(scenes.menuScene)
+    setNewScene(scenes.menu)
 }
 
 function resizeCanvas()
@@ -50,14 +50,21 @@ function initColors()
 
 function initFonts()
 {
-    h1 = {
-        color: "#DE4",
-        typeFace: (canvas.height / 30) + "px Arial",
-    }
+    fonts = {
+        h1: {
+            color: "#DE4",
+            typeFace: (canvas.height / 30) + "px Arial",
+        },
 
-    h2 = {
-        color: "#EED",
-        typeFace: (canvas.height / 40) + "px Arial",
+        h2: {
+            color: "#EED",
+            typeFace: (canvas.height / 40) + "px Arial",
+        },
+
+        h3: {
+            color: "#000",
+            typeFace: (canvas.height / 30) + "px Arial",
+        },
     }
 }
 
@@ -65,13 +72,13 @@ function initScenes()
 {
     scenes = {
 
-        menuScene: {
+        menu: {
             draw: function()
             {
                 ctx.fillStyle = menuBackground
                 ctx.fillRect(0, 0, canvas.width * dpi, canvas.height * dpi)
-                drawText("COLOUR MATCH", h1)
-                drawText("Click to play", h2, canvas.width / 2, canvas.height * 0.66)
+                drawText("COLOUR MATCH", fonts.h1)
+                drawText("Click to play", fonts.h2, canvas.width / 2, canvas.height * 0.66)
             },
             listeners: [
                 {
@@ -79,6 +86,17 @@ function initScenes()
                     type: 'click',
                     function: (e) => setNewScene(getHighestLevel()),
                 }
+            ]
+        },
+
+        finish: {
+            draw: function () {
+                ctx.fillStyle = menuBackground
+                ctx.fillRect(0, 0, canvas.width * dpi, canvas.height * dpi)
+                drawText("Thanks For Playing", fonts.h1)
+            },
+            listeners: [
+
             ]
         },
 
@@ -114,15 +132,29 @@ function initScenes()
 
         level3: {
             vars: {
-                colorGridRows: 3,
+                colorGridRows: 2,
                 colorGridCols: 2,
                 colorGrid: [
-                    '#002', '#005',
-                    '#028', '#20A',
+                    '#003', '#008',
                     '#00C', '#00F',
                 ],
                 questionTimeout: 3_000,
                 nextScene: 'level4',
+            },
+            draw: colorQuestionDraw,
+            listeners: [colorQuestionListener]
+        },
+
+        level4: {
+            vars: {
+                colorGridRows: 2,
+                colorGridCols: 2,
+                colorGrid: [
+                    '#411', '#600',
+                    '#D22', '#F00',
+                ],
+                questionTimeout: 3_000,
+                nextScene: 'finish',
             },
             draw: colorQuestionDraw,
             listeners: [colorQuestionListener]
@@ -246,11 +278,11 @@ function getCursorPosition(event)
 
 function countdown(time)
 {
-    drawText(time / 1_000, h1)
+    drawText(time / 1_000, fonts.h1)
     for (let rem = time; rem > 0; rem -= 1_000) {
         setTimeout(function(rem){
             drawQuestionColor()
-            drawText(rem / 1_000, h1)
+            drawText(rem / 1_000, fonts.h1)
         }, time - rem, rem)
     }
 }
@@ -273,14 +305,14 @@ let colorQuestionListener = {
         let selectedColIndex = (row * currentScene.vars.colorGridRows) + col
 
         if (selectedColIndex === currentScene.vars.chosenColor) {
-            ctx.fillStyle = '#000'
+            ctx.fillStyle = '#FFF'
             ctx.fillRect(0, 0, canvas.height * dpi, canvas.width * dpi)
-            drawText('Correct! Click to continue...', h2)
+            drawText('Correct! Click to continue...', fonts.h3)
             currentScene.vars.levelComplete = true
         } else {
             alert('NO!')
             setHighestLevel('level1')
-            setNewScene(scenes.menuScene)
+            setNewScene(scenes.menu)
         }
     },
 }
