@@ -96,7 +96,11 @@ function initScenes()
                 drawText("Thanks For Playing", fonts.h1)
             },
             listeners: [
-
+                {
+                    target: window,
+                    type: 'click',
+                    function: (e) => setNewScene(scenes.menu),
+                }
             ]
         },
 
@@ -152,6 +156,36 @@ function initScenes()
                 colorGrid: [
                     '#411', '#600',
                     '#D22', '#F00',
+                ],
+                questionTimeout: 3_000,
+                nextScene: 'level5',
+            },
+            draw: colorQuestionDraw,
+            listeners: [colorQuestionListener]
+        },
+
+        level5: {
+            vars: {
+                colorGridRows: 2,
+                colorGridCols: 2,
+                colorGrid: [
+                    '#000', '#500',
+                    '#050', '#005',
+                ],
+                questionTimeout: 3_000,
+                nextScene: 'level6',
+            },
+            draw: colorQuestionDraw,
+            listeners: [colorQuestionListener]
+        },
+
+        level6: {
+            vars: {
+                colorGridRows: 2,
+                colorGridCols: 3,
+                colorGrid: [
+                    '#FF0', '#F0F', '#0FF',
+                    '#00F', '#F00', '#0F0',
                 ],
                 questionTimeout: 3_000,
                 nextScene: 'finish',
@@ -302,7 +336,7 @@ let colorQuestionListener = {
         let pos = getCursorPosition(e)
         let col = Math.floor(pos.x / currentScene.vars.rectWidth)
         let row = Math.floor(pos.y / currentScene.vars.rectHeight)
-        let selectedColIndex = (row * currentScene.vars.colorGridRows) + col
+        let selectedColIndex = (row * currentScene.vars.colorGridCols) + col
 
         if (selectedColIndex === currentScene.vars.chosenColor) {
             ctx.fillStyle = '#FFF'
