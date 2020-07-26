@@ -83,33 +83,41 @@ function initScenes()
                     '#999', '#555',
                 ],
                 questionTimeout: 3_000,
+                nextScene: 'level2',
             },
-            draw: function()
-            {
-                randomizeColorGrid()
-                chooseColor()
-                drawQuestionColor()
-                setTimeout(drawColorGrid, currentScene.vars.questionTimeout)
-                countdown(currentScene.vars.questionTimeout)
-            },
-            listeners: [
-                {
-                    target: window,
-                    type: 'click',
-                    function: function(e){
-                        let pos = getCursorPosition(e)
-                        let col = Math.floor(pos.x / currentScene.vars.rectWidth)
-                        let row = Math.floor(pos.y / currentScene.vars.rectHeight)
-                        let selectedColIndex = col * currentScene.vars.colorGridCols + row
+            draw: colorQuestionDraw,
+            listeners: [colorQuestionListener]
+        },
 
-                        if (selectedColIndex === currentScene.vars.chosenColor){
-                            alert('WIN!')
-                        } else {
-                            alert('NO!')
-                        }
-                    },
-                }
-            ]
+        level2: {
+            vars: {
+                colorGridRows: 2,
+                colorGridCols: 2,
+                colorGrid: [
+                    '#FF0', '#CC0',
+                    '#770', '#330',
+                ],
+                questionTimeout: 3_000,
+                nextScene: 'level3',
+            },
+            draw: colorQuestionDraw,
+            listeners: [colorQuestionListener]
+        },
+
+        level3: {
+            vars: {
+                colorGridRows: 3,
+                colorGridCols: 2,
+                colorGrid: [
+                    '#00F', '#22F',
+                    '#40D', '#11E',
+                    '#66D', '#22C',
+                ],
+                questionTimeout: 3_000,
+                nextScene: 'level4',
+            },
+            draw: colorQuestionDraw,
+            listeners: [colorQuestionListener]
         },
 
     }
@@ -181,14 +189,16 @@ function drawColorGrid()
         for (let col = 0; col < currentScene.vars.colorGridCols; col++) {
             ctx.fillStyle = currentScene.vars.colorGrid[colIndex]
             ctx.fillRect(
-                row * currentScene.vars.rectWidth,
-                col * currentScene.vars.rectHeight,
+                col * currentScene.vars.rectWidth,
+                row * currentScene.vars.rectHeight,
                 currentScene.vars.rectWidth,
                 currentScene.vars.rectHeight
             )
             colIndex++
         }
     }
+
+    currentScene.vars.colorGridDrawn = true
 }
 
 function chooseColor()
@@ -221,4 +231,33 @@ function countdown(time)
             drawText(rem / 1_000, h1)
         }, time - rem, rem)
     }
+}
+
+let colorQuestionListener = {
+    target: window,
+    type: 'click',
+    function: function (e) {
+        if (!currentScene.vars.colorGridDrawn) return false
+        let pos = getCursorPosition(e)
+        let col = Math.floor(pos.x / currentScene.vars.rectWidth)
+        let row = Math.floor(pos.y / currentScene.vars.rectHeight)
+        let selectedColIndex = col * currentScene.vars.colorGridCols + row
+
+        if (selectedColIndex === currentScene.vars.chosenColor) {
+            alert('WIN!')
+            setNewScene(scenes[currentScene.vars.nextScene])
+        } else {
+            alert('NO!')
+            setNewScene(scenes.menuScene)
+        }
+    },
+}
+
+function colorQuestionDraw() {
+    currentScene.vars.colorGridDrawn  = false
+    randomizeColorGrid()
+    chooseColor()
+    drawQuestionColor()
+    setTimeout(drawColorGrid, currentScene.vars.questionTimeout)
+    countdown(currentScene.vars.questionTimeout)
 }
