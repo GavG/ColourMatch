@@ -93,24 +93,28 @@ function initScenes()
             draw: function () {
                 ctx.fillStyle = menuBackground
                 ctx.fillRect(0, 0, canvas.width * dpi, canvas.height * dpi)
+                drawText("YOU WIN!", fonts.h1, canvas.width * 0.5, canvas.height * 0.33)
                 drawText("Thanks For Playing", fonts.h1)
+                drawText("Click to play again", fonts.h2, canvas.width * 0.5, canvas.height * 0.66)
             },
             listeners: [
                 {
                     target: window,
                     type: 'click',
-                    function: (e) => setNewScene(scenes.menu),
+                    function: (e) => {
+                        setNewScene(scenes.level1)
+                    },
                 }
             ]
         },
 
         level1: {
-            vars:{
+            vars: {
                 colorGridRows: 2,
-                colorGridCols: 2,
+                colorGridCols: 3,
                 colorGrid: [
-                    '#FFF', '#CCC',
-                    '#999', '#555',
+                    '#FF0', '#F0F', '#0FF',
+                    '#00F', '#F00', '#0F0',
                 ],
                 questionTimeout: 3_000,
                 nextScene: 'level2',
@@ -124,8 +128,8 @@ function initScenes()
                 colorGridRows: 2,
                 colorGridCols: 2,
                 colorGrid: [
-                    '#FF0', '#CC0',
-                    '#770', '#330',
+                    '#FFF', '#CCC',
+                    '#999', '#555',
                 ],
                 questionTimeout: 3_000,
                 nextScene: 'level3',
@@ -139,8 +143,8 @@ function initScenes()
                 colorGridRows: 2,
                 colorGridCols: 2,
                 colorGrid: [
-                    '#003', '#008',
-                    '#00C', '#00F',
+                    '#000', '#500',
+                    '#050', '#005',
                 ],
                 questionTimeout: 3_000,
                 nextScene: 'level4',
@@ -169,8 +173,8 @@ function initScenes()
                 colorGridRows: 2,
                 colorGridCols: 2,
                 colorGrid: [
-                    '#000', '#500',
-                    '#050', '#005',
+                    '#003', '#008',
+                    '#00C', '#00F',
                 ],
                 questionTimeout: 3_000,
                 nextScene: 'level6',
@@ -182,10 +186,26 @@ function initScenes()
         level6: {
             vars: {
                 colorGridRows: 2,
-                colorGridCols: 3,
+                colorGridCols: 2,
                 colorGrid: [
-                    '#FF0', '#F0F', '#0FF',
-                    '#00F', '#F00', '#0F0',
+                    '#FF0', '#CC0',
+                    '#770', '#330',
+                ],
+                questionTimeout: 3_000,
+                nextScene: 'level7',
+            },
+            draw: colorQuestionDraw,
+            listeners: [colorQuestionListener]
+        },
+
+        level6: {
+            vars: {
+                colorGridRows: 3,
+                colorGridCols: 2,
+                colorGrid: [
+                    '#0E3', '#3F3',
+                    '#4D4', '#1C1',
+                    '#9D8', '#8FA',
                 ],
                 questionTimeout: 3_000,
                 nextScene: 'finish',
@@ -339,6 +359,10 @@ let colorQuestionListener = {
         let selectedColIndex = (row * currentScene.vars.colorGridCols) + col
 
         if (selectedColIndex === currentScene.vars.chosenColor) {
+            if(currentScene.vars.nextScene == 'finish'){
+                setHighestLevel('level1')
+                return setNewScene(scenes.finish)
+            }
             ctx.fillStyle = '#FFF'
             ctx.fillRect(0, 0, canvas.height * dpi, canvas.width * dpi)
             drawText('Correct! Click to continue...', fonts.h3)
