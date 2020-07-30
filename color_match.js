@@ -44,21 +44,21 @@ function resizeCanvas()
 function initColors()
 {
     menuBackground = ctx.createLinearGradient(0, 0, canvas.width, canvas.height)
-    menuBackground.addColorStop(0, "#E33")
-    menuBackground.addColorStop(1, "#E66")    
+    menuBackground.addColorStop(0, "#D33")
+    menuBackground.addColorStop(1, "#E66")
 }
 
 function initFonts()
 {
     fonts = {
         h1: {
-            color: "#DE4",
+            color: "#FFF",
             typeFace: (canvas.height / 30) + "px Arial",
         },
 
         h2: {
-            color: "#EED",
-            typeFace: (canvas.height / 40) + "px Arial",
+            color: "#FFF",
+            typeFace: (canvas.height / 35) + "px Arial",
         },
 
         h3: {
@@ -77,8 +77,19 @@ function initScenes()
             {
                 ctx.fillStyle = menuBackground
                 ctx.fillRect(0, 0, canvas.width * dpi, canvas.height * dpi)
+
+                ctx.fillStyle = "#51E";
+                ctx.beginPath();
+                ctx.moveTo(0, canvas.height * 0.2)
+                ctx.bezierCurveTo(0, 0, canvas.width, canvas.height, canvas.width * 2, canvas.height * 0.2);
+                //ctx.quadraticCurveTo(0, 0, canvas.width, canvas.width / 2)
+                ctx.lineTo(canvas.width, canvas.height)
+                ctx.lineTo(0, canvas.height)
+                ctx.stroke()
+                ctx.fill()
+
                 drawText("COLOUR MATCH", fonts.h1)
-                drawText("Click to play", fonts.h2, canvas.width / 2, canvas.height * 0.66)
+                drawText("Click to play", fonts.h2, canvas.width / 2, canvas.height * 0.9)
             },
             listeners: [
                 {
